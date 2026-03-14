@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
-{% block worklog %}
+{% block _body %}
+    <h1 class="text-center">Works log</h1>
+    <br/>
     {% for job in jobs %}
         <div>
             <h2 class="">Action # {{job.id}}</h2>
