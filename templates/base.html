@@ -9,10 +9,11 @@
   <body>
     <div class="container-fluid">
         <div class="alert alert-info" role="alert">
-            <h2>Миссия колонизация Марса</h2>
+            <h2 class="text-center">Поэмика</h2>
+            <p class="text-center">Ваши стихи достойны быть услышанными!</p>
         </div>
-        <h5>И на Марсе будут яблони цвести!</h5>
-    <hr/>
+        {% block _header %} 
+        {% endblock %}
     </div>
     <div class="container">
       {% block _body %}{% endblock %}

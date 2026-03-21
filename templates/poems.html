@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block _header %}
+    <table class="table table-light text-center">
+        <tbody>
+            <tr>
+                <td>
+                    <a href="/">Главная</a>
+                </td>
+                <td>
+                    <a href="/poem/create">Сочинить</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
+{% block _body %}
+    {% for poem in poems %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{poem.title}}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">Автор: {{poem.author.login}}</h6>
+                <button class="btn btn-info" onclick="location.href='/poem/{{poem.id}}'">Читать</button>
+                <br/><br/>
+                {% if poem.author.email == user.email %}
+                    <button class="btn btn-danger" onclick="location.href='/poem/delete/{{poem.id}}'">Удалить</button>
+                    <button class="btn btn-warning" onclick="location.href='/poem/update/{{poem.id}}'">Изменить</button>
+                {% endif %}
+            </div>
+        </div>
+        <br/>
+    {% endfor %}
+{% endblock %}

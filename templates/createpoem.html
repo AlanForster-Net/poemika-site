@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block _body %}
+    {% if user.is_authenticated %}
+        <form method="post" action="">
+            {{form.hidden_tag()}}
+            <div class="form-group">
+                {{form.title.label}}<br/>
+                {{form.title(class="form-control", type="text")}}
+            </div>
+            <div class="form-group">
+                {{form.body.label}}<br/>
+                {{form.body(class="form-control")}}
+            </div>
+            <br/>
+            <div class="form-group">
+                {{form.submit(type="submit", class="form-control btn btn-primary")}}
+            </div>
+        </form>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            Внимание! Вы не можете создавать поэзию, не <a href="/signup">зарегистрировавшись</a> или не <a href="/signin">авторизовавшись</a>!
+        </div>
+    {% endif %}
+{% endblock %}

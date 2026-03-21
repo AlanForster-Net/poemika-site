@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block _header %}
+    <table class="table table-light text-center">
+        <tbody>
+            <tr>
+                <td>
+                    <a href="/">Главная</a>
+                </td>
+                <td>
+                    <a href="/poems">Стихи</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
+{% block _body %}
+    <h1>{{title}}</h1>
+    <h4>Автор: {{poem.author.login}}</h4>
+    <hr/>
+    <p>
+        {% for line in body %}
+            {{line}}<br/>
+        {% endfor %}
+    </p>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block _header %}
+  <table class="table table-light text-center">
+      <tbody>
+        <tr>
+          <td><a href="/poem/create">Сочинить</a></td>
+          <td><a href="/poems">Стихи</a></td>
+          {% if user.is_authenticated %}
+            <td><a href="/signout">Выйти</a></td>
+          {% else %}
+            <td><a href="/signup">Регистрация</a></td>
+            <td><a href="/signin">Войти</a></td>
+          {% endif %}
+        </tr>
+      </tbody>
+    </table>
+    <hr/>
+{% endblock %}
+{% block _body %}
+    {% if user.is_authenticated %}
+        Hello, {{user.surname}} {{user.name}}
+    {% else %}
+        Lain. Who is it?
+    {% endif %}
+{% endblock %}

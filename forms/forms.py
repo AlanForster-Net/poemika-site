@@ -1,16 +1,32 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, EmailField, SubmitField, IntegerField
+from wtforms import PasswordField, StringField, EmailField, SubmitField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired
 
 
-class LoginForm(FlaskForm):
-    login_email = EmailField("Login / Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    password_again = PasswordField("Repeat password", validators=[DataRequired()])
-    surname = StringField("Surname", validators=[DataRequired()])
-    name = StringField("Name", validators=[DataRequired()])
-    age = IntegerField("Age", validators=[DataRequired()])
-    position = StringField("Position", validators=[DataRequired()])
-    speciality = StringField("Speciality", validators=[DataRequired()])
-    address = StringField("Address", validators=[DataRequired()])
-    submit = SubmitField("Login")
+class RegisterForm(FlaskForm):
+    login = StringField("Кто вы среди поэтов?", validators=[DataRequired()])
+    name = StringField("Каково Ваше настоящее имя?")
+    email = EmailField("Эл. почта", validators=[DataRequired()])
+    password = PasswordField("Придумайте пароль", validators=[DataRequired()])
+    password_again = PasswordField("Повторите пароль", validators=[DataRequired()])
+    description = TextAreaField("Если хотите, расскажите немного о себе")
+    submit = SubmitField("Регистрация")
+
+
+class SignInForm(FlaskForm):
+    email = EmailField("Эл. почта", validators=[DataRequired()])
+    password = PasswordField("Пароль", validators=[DataRequired()])
+    remember = BooleanField("Запомните меня")
+    submit = SubmitField("Войти")
+
+
+class CreatePoemForm(FlaskForm):
+    title = StringField("Название", validators=[DataRequired()])
+    body = TextAreaField("Текст", validators=[DataRequired()])
+    submit = SubmitField("Создать")
+
+
+class UpdatePoemForm(FlaskForm):
+    title = StringField("Название", default="")
+    body = TextAreaField("Текст", default="")
+    submit = SubmitField("Изменить")

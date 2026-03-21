@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block _body %}
+    {% if user.is_authenticated %}
+        <div class="row">
+            <div class="col">
+                <form method="post" action="">
+                    {{form.hidden_tag()}}
+                    <div class="form-group">
+                        {{form.title.label}}<br/>
+                        {{form.title(class="form-control", type="text")}}
+                    </div>
+                    <div class="form-group">
+                        {{form.body.label}}<br/>
+                        {{form.body(class="form-control")}}
+                    </div>
+                    <br/>
+                    <div class="form-group">
+                        {{form.submit(type="submit", class="btn btn-primary")}}
+                    </div>
+                </form>
+                <br/>
+                <button class="btn btn-danger" onclick="location.href='/poems'">Отмена</button>
+            </div>
+            <div class="col">
+                <h1>{{poem.title}}</h1>
+                <h5>Автор: {{poem.author.login}}</h5>
+                <hr/>
+                <p>
+                    {% for line in body %}
+                        {{line}}<br/>
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            Внимание! Вы не можете создавать поэзию, не <a href="/signup">зарегистрировавшись</a> или не <a href="/signin">авторизовавшись</a>!
+        </div>
+    {% endif %}
+{% endblock %}
