@@ -11,6 +11,7 @@ app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "poemikakey"
 login = LoginManager(app)
 db = None
+log = open("logs.txt", "w")
 
 
 @login.user_loader
@@ -39,6 +40,7 @@ def signup():
         user.hashed_password = generate_password_hash(form.password.data)
         db.add(user)
         db.commit()
+        login_user(user, remember=True)
         return flask.redirect("/")
     return flask.render_template("signup.html", form=form, message="")
 
@@ -69,6 +71,7 @@ def create_poem():
         poem.title = form.title.data
         poem.body = form.body.data.replace('\n', '#')
         poem.author = current_user
+        poem.is_private = form.is_private.data
         db.add(poem)
         db.commit()
         return flask.redirect("/poems")
@@ -81,6 +84,16 @@ def poems():
     return flask.render_template("poems.html", poems=poems[::-1], user=current_user)
 
 
+@app.route("/poem/read/<poem_id>")
+def readpoem(poem_id):
+    poem = db.get(Poem, poem_id)
+    if poem:
+        poem.read_count += 1
+        db.commit()
+        return flask.redirect(f"/poem/{poem_id}")
+    return flask.redirect("/error/404")
+
+
 @app.route("/poem/<poem_id>")
 def poem(poem_id):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
@@ -90,6 +103,7 @@ def poem(poem_id):
 
 
 @app.route("/poem/delete/<poem_id>")
+@login_required
 def deletepoem(poem_id):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
     if not poem:
@@ -105,20 +119,25 @@ def deletepoem(poem_id):
 @login_required
 def updatepoem(poem_id):
     form = UpdatePoemForm()
-    poem = db.query(Poem).filter(Poem.id == poem_id, Poem.author == current_user).first()
+    poem = db.get(Poem, poem_id)
     if poem:
-        if form.validate_on_submit():
-            if form.body.data.strip():
-                poem.body = form.body.data.replace('\n', '#')
-            if form.title.data.strip():
-                poem.title = form.title.data
-            return flask.redirect('/poems')
         body = poem.body.split('#')
-        db.commit()
+        if form.validate_on_submit():
+            poem.title = form.title.data
+            poem.body = form.body.data.replace('\n', '#') if not form.left.data else poem.body
+            poem.author = current_user
+            poem.is_private = form.is_private.data
+            db.commit()
+            return flask.redirect('/poems')
         return flask.render_template("updatepoem.html", form=form, user=current_user, poem=poem, body=body)
+    else:
+        return flask.redirect("/error/404")
 
         
-
+@app.route("/authors")
+def authors():
+    users = db.query(User).order_by(User.login).all()
+    return flask.render_template("authors.html", users=users)
 
 @app.route("/success")
 def success():

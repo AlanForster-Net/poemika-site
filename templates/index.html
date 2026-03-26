@@ -5,6 +5,7 @@
         <tr>
           <td><a href="/poem/create">Сочинить</a></td>
           <td><a href="/poems">Стихи</a></td>
+          <td><a href="/authors">Авторы</a></td>
           {% if user.is_authenticated %}
             <td><a href="/signout">Выйти</a></td>
           {% else %}
@@ -18,7 +19,12 @@
 {% endblock %}
 {% block _body %}
     {% if user.is_authenticated %}
-        Hello, {{user.surname}} {{user.name}}
+        <div class="container">
+          <h2 class="text-center">Добро пожаловать в лоно поэзии, {{user.login}} (он же {{user.name}})</h2>
+          <h4 class="text-center">Наш сервис считает своим долгом напомнить наш девиз: <em><strong>"Ваши стихи достойны быть услышанными"</strong></em></h4>
+          <hr/>
+          <h5>Мы стремимся сделать стихосложение удобным, чтобы каждый желающий мог поделиться своими чувствами с окружающими, если он того хочет</h5>
+        </div>
     {% else %}
         Lain. Who is it?
     {% endif %}

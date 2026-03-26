@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block _header %}
+    <table class="table table-light text-center">
+        <tbody>
+            <tr>
+                <td>
+                    <a href="/">Главная</a>
+                </td>
+                <td>
+                    <a href="/poem/create">Сочинить</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
+{% block _body %}
+    {% for user in users %}
+        <div class="card">
+            <div class="card-header">
+                {{user.login}}
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{user.email}}</h5>
+                <p class="card-text">{{user.description}}</p>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-info">Профиль</button>
+            </div>
+        </div>
+        <br/>
+    {% endfor %}
+{% endblock %}

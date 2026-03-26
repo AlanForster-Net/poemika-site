@@ -12,7 +12,13 @@
                     </div>
                     <div class="form-group">
                         {{form.body.label}}<br/>
-                        {{form.body(class="form-control")}}
+                        {{form.body(class="form-control", rows="7")}}
+                    </div>
+                    <div class="form-group">
+                        {{form.left()}} {{form.left.label}}
+                    </div>
+                    <div class="form-group">
+                        {{form.is_private()}} {{form.is_private.label}}
                     </div>
                     <br/>
                     <div class="form-group">
@@ -32,10 +38,6 @@
                     {% endfor %}
                 </p>
             </div>
-        </div>
-    {% else %}
-        <div class="alert alert-warning" role="alert">
-            Внимание! Вы не можете создавать поэзию, не <a href="/signup">зарегистрировавшись</a> или не <a href="/signin">авторизовавшись</a>!
         </div>
     {% endif %}
 {% endblock %}

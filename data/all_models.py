@@ -24,4 +24,6 @@ class Poem(SqlAlchemyBase):
     author = orm.relationship("User")
     title = sqlalchemy.Column(sqlalchemy.String(25))
     body = sqlalchemy.Column(sqlalchemy.Text)
+    read_count = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    is_private = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
     created = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())

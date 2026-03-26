@@ -23,10 +23,13 @@ class SignInForm(FlaskForm):
 class CreatePoemForm(FlaskForm):
     title = StringField("Название", validators=[DataRequired()])
     body = TextAreaField("Текст", validators=[DataRequired()])
-    submit = SubmitField("Создать")
+    is_private = BooleanField("Хотите сделать приватным?")
+    submit = SubmitField("Записать")
 
 
 class UpdatePoemForm(FlaskForm):
-    title = StringField("Название", default="")
-    body = TextAreaField("Текст", default="")
-    submit = SubmitField("Изменить")
+    title = StringField("Название", validators=[DataRequired()])
+    body = TextAreaField("Текст")
+    left = BooleanField("Оставить текст прежним?")
+    is_private = BooleanField("Хотите сделать приватным?")
+    submit = SubmitField("Записать")

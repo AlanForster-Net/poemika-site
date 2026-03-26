@@ -15,18 +15,44 @@
 {% endblock %}
 {% block _body %}
     {% for poem in poems %}
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{poem.title}}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">Автор: {{poem.author.login}}</h6>
-                <button class="btn btn-info" onclick="location.href='/poem/{{poem.id}}'">Читать</button>
-                <br/><br/>
-                {% if poem.author.email == user.email %}
-                    <button class="btn btn-danger" onclick="location.href='/poem/delete/{{poem.id}}'">Удалить</button>
-                    <button class="btn btn-warning" onclick="location.href='/poem/update/{{poem.id}}'">Изменить</button>
-                {% endif %}
+        {% if not poem.is_private%}
+            <div class="card">
+                <div class="card-header">
+                    {{poem.author.login}}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{poem.title}}</h5>
+                    <p class="card-text">Выложено {{poem.created.ctime()}}</p>
+                    <p class="card-text">Прочитало {{poem.read_count}}</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-info" onclick="location.href='/poem/read/{{poem.id}}'">Читать</button>
+                    {% if poem.author == current_user %}
+                        <button class="btn btn-danger" onclick="location.href='/poem/delete/{{poem.id}}'">Удалить</button>
+                        <button class="btn btn-warning" onclick="location.href='/poem/update/{{poem.id}}'">Изменить</button>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        <br/>
+            <br/>
+        {% elif poem.is_private and current_user == poem.author %}
+            <div class="card">
+                <div class="card-header">
+                    {{poem.title}}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Автор {{poem.author.login}}</h5>
+                    <p class="card-text">Выложено {{poem.created.ctime()}}</p>
+                    <p class="card-text">Прочитало {{poem.read_count}}</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-info" onclick="location.href='/poem/read/{{poem.id}}'">Читать</button>
+                    {% if poem.author == current_user %}
+                        <button class="btn btn-danger" onclick="location.href='/poem/delete/{{poem.id}}'">Удалить</button>
+                        <button class="btn btn-warning" onclick="location.href='/poem/update/{{poem.id}}'">Изменить</button>
+                    {% endif %}
+                </div>
+            </div>
+            <br/>
+        {% endif %}
     {% endfor %}
 {% endblock %}
