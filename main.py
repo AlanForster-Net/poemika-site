@@ -18,12 +18,13 @@ log = open("logs.txt", "w")
 def load_user(user_id):
     return db.get(User, user_id)
 
-
+# INDEX
 @app.route('/')
 def index():
     return flask.render_template("index.html", user=current_user)
+#INDEX
 
-
+# USER LOGGING
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     form = RegisterForm()
@@ -62,22 +63,9 @@ def signin():
 def signout():
     logout_user()
     return flask.redirect("/")
+# USER LOGGING
 
-@app.route("/poem/create", methods=["GET", "POST"])
-def create_poem():
-    form = CreatePoemForm()
-    if form.validate_on_submit():
-        poem = Poem()
-        poem.title = form.title.data
-        poem.body = form.body.data.replace('\n', '#')
-        poem.author = current_user
-        poem.is_private = form.is_private.data
-        db.add(poem)
-        db.commit()
-        return flask.redirect("/poems")
-    return flask.render_template("createpoem.html", form=form, user=current_user)
-
-
+# POEM ACTIONS
 @app.route("/poems")
 def poems():
     poems = db.query(Poem).all()
@@ -92,6 +80,21 @@ def readpoem(poem_id):
         db.commit()
         return flask.redirect(f"/poem/{poem_id}")
     return flask.redirect("/error/404")
+
+
+@app.route("/poem/create", methods=["GET", "POST"])
+def create_poem():
+    form = CreatePoemForm()
+    if form.validate_on_submit():
+        poem = Poem()
+        poem.title = form.title.data
+        poem.body = form.body.data.replace('\n', '#')
+        poem.author = current_user
+        poem.is_private = form.is_private.data
+        db.add(poem)
+        db.commit()
+        return flask.redirect("/poems")
+    return flask.render_template("createpoem.html", form=form, user=current_user)
 
 
 @app.route("/poem/<poem_id>")
@@ -132,13 +135,43 @@ def updatepoem(poem_id):
         return flask.render_template("updatepoem.html", form=form, user=current_user, poem=poem, body=body)
     else:
         return flask.redirect("/error/404")
+# POEM ACTIONS
 
-        
+# AUTHOR ACTIONS     
 @app.route("/authors")
 def authors():
     users = db.query(User).order_by(User.login).all()
     return flask.render_template("authors.html", users=users)
 
+@app.route("/authors/<author_id>")
+def author(author_id):
+    author = db.get(User, author_id)
+    if author:
+        poems = db.query(Poem).filter(Poem.author == author).all()
+        return flask.render_template("author.html", author=author, poems=poems)
+# AUTHOR ACTONS
+
+# REST ACTIONS
+api = flask.Blueprint("api", __name__, template_folder='templates')
+
+@api.route("/api/poems", methods=["GET"])
+def getPoems():
+    return flask.jsonify({
+        "poems": [poem.to_dict(only=("id", "author_id", "title", "body", "read_count", "is_private", "created")) for poem in db.query(Poem).all()]
+    })
+
+
+@api.route("/api/poems/<poem_id>", methods=["GET"])
+def getPoemById(poem_id):
+    poem = db.get(Poem, poem_id)
+    if poem:
+        return flask.jsonify({
+            "poems": poem.to_dict(only=("id", "author_id", "title", "body", "read_count", "is_private", "created"))
+        })
+    return flask.make_response({"code": 404, "reason": "unexisting poem"})
+# REST ACTIONS
+
+# SYSTEM
 @app.route("/success")
 def success():
     return flask.render_template("success.html")
@@ -147,9 +180,10 @@ def success():
 @app.route("/error/<err>")
 def error(err):
     return flask.render_template("error.html", err_code=err)
-
+# SYSTEM
 
 def main():
+    app.register_blueprint(api)
     app.run(debug=True)
 
 if __name__ == "__main__":

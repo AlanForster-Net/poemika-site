@@ -3,9 +3,10 @@ import datetime
 import sqlalchemy
 import sqlalchemy.orm as orm
 from flask_login import UserMixin
+from sqlalchemy_serializer import SerializerMixin
 
 
-class User(SqlAlchemyBase, UserMixin):
+class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     login = sqlalchemy.Column(sqlalchemy.String)
@@ -17,7 +18,7 @@ class User(SqlAlchemyBase, UserMixin):
     
 
 
-class Poem(SqlAlchemyBase):
+class Poem(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "poems"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     author_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey(User.id))

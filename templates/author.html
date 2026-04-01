@@ -9,11 +9,16 @@
                 <td>
                     <a href="/poem/create">Сочинить</a>
                 </td>
+                <td>
+                    <a href="/authors">Авторы</a>
+                </td>
             </tr>
         </tbody>
     </table>
 {% endblock %}
 {% block _body %}
+    <h2>{{author.login}}</h2>
+    <hr/>
     {% for poem in poems %}
         {% if not poem.is_private%}
             <div class="card">
