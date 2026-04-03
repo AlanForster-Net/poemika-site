@@ -10,7 +10,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = "users"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     login = sqlalchemy.Column(sqlalchemy.String)
-    name = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String, default="Неизвестный")
     email = sqlalchemy.Column(sqlalchemy.String, unique=True)
     description = sqlalchemy.Column(sqlalchemy.Text, default="Я поэт, тем и интересен")
     hashed_password = sqlalchemy.Column(sqlalchemy.String)

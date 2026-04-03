@@ -229,14 +229,52 @@ def getAuthors():
     })
 
 
-@api.route("/api/authors/<author_id>")
+@api.route("/api/authors/<author_id>", methods=["GET"])
 def getAuthorById(author_id):
     author = db.get(User, author_id)
     if not author:
         return flask.make_response(flask.jsonify({"code": 404, "reason": "unexisting author"}))
     return flask.jsonify({
-        "authors": author.to_dict(only=("id", "login", "name", "email", "description", "hashed_password")) for author in db.query(User).all()
+        "authors": author.to_dict(only=("id", "login", "name", "email", "description", "hashed_password"))
     })
+
+
+@api.route("/api/authors", methods=["POST"])
+def postAuthor():
+    if not flask.request.json:
+        return flask.make_response(flask.jsonify({"code": 500, "reason": "empty request"}))
+    elif not all(header in flask.request.json for header in ("login", "email", "password")):
+        return flask.make_response(flask.jsonify({"code": 500, "reason": "bad request"}))
+    author = User()
+    req = flask.request.json
+    author.login = req["login"]
+    author.email = req["email"]
+    author.hashed_password = generate_password_hash(req["password"])
+    if "name" in req:
+        author.name = req["name"]
+    if "description" in req:
+        author.description = req["description"]
+    db.add(author)
+    db.commit()
+    return flask.jsonify({
+        "authors": author.to_dict(only=("id", "login", "name", "email", "description", "hashed_password"))
+    })
+
+@api.route("/api/authors", methods=["DELETE"])
+def deleteAuthor():
+    if not flask.request.json:
+        return flask.make_response(flask.jsonify({"code": 500, "reason": "empty request"}))
+    elif not all(header in flask.request.json for header in ("id", "password")):
+        return flask.make_response(flask.jsonify({"code": 500, "reason": "bad request"}))
+    req = flask.request.json
+    author = db.get(User, req["id"])
+    if not author:
+        return flask.make_response(flask.jsonify({"code": 404, "reason": "unexisting author"}))
+    if not check_password_hash(author.hashed_password, req["password"]):
+        return flask.make_response(flask.jsonify({"code": 403, "reason": "forbidden"}))
+    db.delete(author)
+    db.commit()
+    return flask.make_response(flask.jsonify({"code": 200, "reason": "Success delete"}))
 # REST ACTIONS
 
 
