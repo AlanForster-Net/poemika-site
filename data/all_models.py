@@ -12,7 +12,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     login = sqlalchemy.Column(sqlalchemy.String)
     name = sqlalchemy.Column(sqlalchemy.String)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True)
-    description = sqlalchemy.Column(sqlalchemy.Text)
+    description = sqlalchemy.Column(sqlalchemy.Text, default="Я поэт, тем и интересен")
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     poems = orm.relationship("Poem", back_populates="author")
     

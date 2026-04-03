@@ -17,7 +17,21 @@
     </table>
 {% endblock %}
 {% block _body %}
-    <h2>{{author.login}}</h2>
+    <h2 class="text-center">{{author.login}}</h2>
+    <br/>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Эл. почта</h5>
+            <p class="card-text">{{author.email}}</p>
+        </div>
+    </div>
+    <br/>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">О себе</h5>
+            <p class="card-text">{{author.description}}</p>
+        </div>
+    </div>
     <hr/>
     {% for poem in poems %}
         {% if not poem.is_private%}
