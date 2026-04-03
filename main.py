@@ -291,7 +291,7 @@ def error(err):
 
 def main():
     app.register_blueprint(api)
-    app.run(debug=True)
+    app.run(port=5000)
 
 if __name__ == "__main__":
     db_session.global_init("./db/poemikadb.sqlite")
