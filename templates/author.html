@@ -19,6 +19,7 @@
 {% block _body %}
     <h2 class="text-center">{{author.login}}</h2>
     <br/>
+    <!--
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Эл. почта</h5>
@@ -26,22 +27,35 @@
         </div>
     </div>
     <br/>
+    -->
+    <div class="alert alert-primary" role="alert">
+        <h5>Эл. почта</h5>
+        <h6>{{author.email}}</h6>
+    </div>
+
+    <!--
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">О себе</h5>
             <p class="card-text">{{author.description}}</p>
         </div>
     </div>
+    -->
+    <div class="alert alert-secondary" role="alert">
+        <h5>О себе</h5>
+        <h6>{{author.description}}</h6>
+    </div>
     <hr/>
+    <h2 class="text-center text-secondary">Список произведений</h2>
     {% for poem in poems %}
         {% if not poem.is_private%}
             <div class="card">
                 <div class="card-header">
-                    {{poem.author.login}}
+                    <span class="text-secondary">{{poem.author.login}}</span>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{poem.title}}</h5>
-                    <p class="card-text">Выложено {{poem.created.ctime()}}</p>
+                    <h5 class="card-title"><i>{{poem.title}}</i></h5>
+                    <p class="card-text text-secondary">Выложено {{poem.created.ctime()}}</p>
                     <p class="card-text">Прочитало {{poem.read_count}} человек(-а)</p>
                 </div>
                 <div class="card-footer">
