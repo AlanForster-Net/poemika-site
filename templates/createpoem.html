@@ -16,10 +16,8 @@
                 {{form.is_private()}} {{form.is_private.label}}
             </div>
             <br/>
-            {{form.submit(class="btn btn-primary", type="submit")}}
-            <br/>
-            <br/>
-            <button class="btn btn-danger" onclick="location.href='/poems'">Отмена</button>
+                {{form.submit(class="btn btn-primary", type="submit")}}
+                <button class="btn btn-danger" onclick="location.href='/poems'">Отмена</button>
         </form>
     {% else %}
         <div class="alert alert-warning" role="alert">

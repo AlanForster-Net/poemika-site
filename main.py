@@ -2,7 +2,7 @@ from data import db_session
 from data.all_models import User, Poem
 import flask
 import datetime
-from os.path import abspath
+from pathlib import Path
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms.forms import RegisterForm, SignInForm, CreatePoemForm, UpdatePoemForm
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -50,7 +50,6 @@ def signup():
         return flask.redirect("/")
     return flask.render_template("signup.html", form=form, message="")
 
-
 @userlogin.route("/signin", methods=["GET", "POST"])
 def signin():
     form = SignInForm()
@@ -61,7 +60,6 @@ def signin():
             return flask.redirect("/")
         return flask.redirect("/error/bad-user")
     return flask.render_template("signin.html", form=form)
-
 
 @userlogin.route("/signout")
 @login_required
@@ -80,7 +78,6 @@ def poems():
     poems = db.query(Poem).all()
     return flask.render_template("poems.html", poems=poems[::-1], user=current_user)
 
-
 @poem_actions.route("/poem/read/<poem_id>")
 def readpoem(poem_id):
     poem = db.get(Poem, poem_id)
@@ -90,14 +87,12 @@ def readpoem(poem_id):
         return flask.redirect(f"/poem/{poem_id}")
     return flask.redirect("/error/404")
 
-
 @poem_actions.route("/poem/<poem_id>")
 def poem(poem_id):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
     title = poem.title
     body = poem.body.split('#')
     return flask.render_template("poem.html", title=title, body=body, poem=poem)
-
 
 @poem_actions.route("/poem/create", methods=["GET", "POST"])
 def poemCreate():
@@ -108,30 +103,31 @@ def poemCreate():
         poem.body = form.body.data.replace('\n', '#')
         poem.author = current_user
         poem.is_private = form.is_private.data
-        file = form.file.data
-        if file:
-            file = abspath(file)
-            poem.body = '#'.join(open(file).readlines())
         db.add(poem)
         db.commit()
         return flask.redirect("/poems")
     return flask.render_template("createpoem.html", form=form, user=current_user)
 
-
-@poem_actions.route("/poem/delete/<poem_id>")
+@poem_actions.route("/poem/delete/<int:poem_id>")
 @login_required
 def poemDelete(poem_id):
-    poem = db.query(Poem).filter(Poem.id == poem_id).first()
+    poem = db.get(Poem, poem_id)
     if not poem:
         return flask.redirect("/error/unexisting")
     author = poem.author
+    pid = int(poem_id) + 1
     if current_user == author:
         db.delete(poem)
+        while True:
+            o_poem = db.get(Poem, pid)
+            if not o_poem:
+                break
+            o_poem.id -= 1
+            pid += 1
         db.commit()
     return flask.redirect("/poems")
 
-
-@poem_actions.route("/poem/update/<poem_id>", methods=["GET", "POST"])
+@poem_actions.route("/poem/update/<int:poem_id>", methods=["GET", "POST"])
 @login_required
 def poemUpdate(poem_id):
     form = UpdatePoemForm()
@@ -160,7 +156,6 @@ def authors():
     users = db.query(User).order_by(User.login).all()
     return flask.render_template("authors.html", users=users)
 
-
 @author_actions.route("/authors/<author_id>")
 def author(author_id):
     author = db.get(User, author_id)
@@ -179,12 +174,12 @@ def authorUpdate(author_id):
 # REST ACTIONS
 api = flask.Blueprint("api", __name__, template_folder='templates')
 
+
 @api.route("/api/poems", methods=["GET"])
 def getPoems():
     return flask.jsonify({
         "poems": [poem.to_dict(only=("id", "author_id", "title", "body", "read_count", "is_private", "created")) for poem in db.query(Poem).all()]
     })
-
 
 @api.route("/api/poems/<poem_id>", methods=["GET"])
 def getPoemById(poem_id):
@@ -194,7 +189,6 @@ def getPoemById(poem_id):
             "poems": poem.to_dict(only=("id", "author_id", "title", "body", "read_count", "is_private", "created"))
         })
     return flask.make_response(flask.jsonify({"code": 404, "reason": "unexisting poem"}))
-
 
 @api.route("/api/poems", methods=["POST"])
 def postPoem():
@@ -217,7 +211,6 @@ def postPoem():
         "poems": poem.to_dict(only=("id", "author_id", "title", "body", "read_count", "is_private", "created"))
     })
 
-
 @api.route("/api/poems", methods=["DELETE"])
 def deletePoem():
     if not flask.request.json:
@@ -231,17 +224,22 @@ def deletePoem():
     author = db.get(User, poem.author_id)
     if not check_password_hash(author.hashed_password, req["password"]):
         return flask.make_response(flask.jsonify({"code": 403, "reason": "forbidden"}))
+    pid = poem.id
     db.delete(poem)
+    while True:
+            o_poem = db.get(Poem, pid)
+            if not o_poem:
+                break
+            o_poem.id -= 1
+            pid += 1
     db.commit()
     return flask.make_response(flask.jsonify({"code": 200, "reason": "Success delete"}))
-
 
 @api.route("/api/authors", methods=["GET"])
 def getAuthors():
     return flask.jsonify({
         "authors": [author.to_dict(only=("id", "login", "name", "email", "description", "hashed_password")) for author in db.query(User).all()]
     })
-
 
 @api.route("/api/authors/<author_id>", methods=["GET"])
 def getAuthorById(author_id):
@@ -251,7 +249,6 @@ def getAuthorById(author_id):
     return flask.jsonify({
         "authors": author.to_dict(only=("id", "login", "name", "email", "description", "hashed_password"))
     })
-
 
 @api.route("/api/authors", methods=["POST"])
 def postAuthor():
@@ -297,7 +294,6 @@ system = flask.Blueprint("systempages", __name__, template_folder='/templates')
 @system.route("/success")
 def success():
     return flask.render_template("success.html")
-
 
 @system.route("/error/<err>")
 def error(err):
