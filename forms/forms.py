@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, EmailField, SubmitField, TextAreaField, BooleanField
+from wtforms import PasswordField, StringField, EmailField, SubmitField, TextAreaField, BooleanField, FileField
 from wtforms.validators import DataRequired
 
 
@@ -23,6 +23,7 @@ class SignInForm(FlaskForm):
 class CreatePoemForm(FlaskForm):
     title = StringField("Название", validators=[DataRequired()])
     body = TextAreaField("Текст", validators=[DataRequired()])
+    file = FileField("Загрузить файл", default="")
     is_private = BooleanField("Хотите сделать приватным?")
     submit = SubmitField("Записать")
 

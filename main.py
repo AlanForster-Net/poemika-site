@@ -2,6 +2,7 @@ from data import db_session
 from data.all_models import User, Poem
 import flask
 import datetime
+from os.path import abspath
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms.forms import RegisterForm, SignInForm, CreatePoemForm, UpdatePoemForm
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -26,7 +27,10 @@ def index():
 
 
 # USER LOGGING
-@app.route("/signup", methods=["GET", "POST"])
+userlogin = flask.Blueprint("userlogin", __name__, template_folder='/templates')
+
+
+@userlogin.route("/signup", methods=["GET", "POST"])
 def signup():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -47,7 +51,7 @@ def signup():
     return flask.render_template("signup.html", form=form, message="")
 
 
-@app.route("/signin", methods=["GET", "POST"])
+@userlogin.route("/signin", methods=["GET", "POST"])
 def signin():
     form = SignInForm()
     if form.validate_on_submit():
@@ -59,7 +63,7 @@ def signin():
     return flask.render_template("signin.html", form=form)
 
 
-@app.route("/signout")
+@userlogin.route("/signout")
 @login_required
 def signout():
     logout_user()
@@ -68,13 +72,16 @@ def signout():
 
 
 # POEM ACTIONS
-@app.route("/poems")
+poem_actions = flask.Blueprint("poemactions", __name__, template_folder='/templates')
+
+
+@poem_actions.route("/poems")
 def poems():
     poems = db.query(Poem).all()
     return flask.render_template("poems.html", poems=poems[::-1], user=current_user)
 
 
-@app.route("/poem/read/<poem_id>")
+@poem_actions.route("/poem/read/<poem_id>")
 def readpoem(poem_id):
     poem = db.get(Poem, poem_id)
     if poem:
@@ -84,7 +91,7 @@ def readpoem(poem_id):
     return flask.redirect("/error/404")
 
 
-@app.route("/poem/<poem_id>")
+@poem_actions.route("/poem/<poem_id>")
 def poem(poem_id):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
     title = poem.title
@@ -92,7 +99,7 @@ def poem(poem_id):
     return flask.render_template("poem.html", title=title, body=body, poem=poem)
 
 
-@app.route("/poem/create", methods=["GET", "POST"])
+@poem_actions.route("/poem/create", methods=["GET", "POST"])
 def poemCreate():
     form = CreatePoemForm()
     if form.validate_on_submit():
@@ -101,13 +108,17 @@ def poemCreate():
         poem.body = form.body.data.replace('\n', '#')
         poem.author = current_user
         poem.is_private = form.is_private.data
+        file = form.file.data
+        if file:
+            file = abspath(file)
+            poem.body = '#'.join(open(file).readlines())
         db.add(poem)
         db.commit()
         return flask.redirect("/poems")
     return flask.render_template("createpoem.html", form=form, user=current_user)
 
 
-@app.route("/poem/delete/<poem_id>")
+@poem_actions.route("/poem/delete/<poem_id>")
 @login_required
 def poemDelete(poem_id):
     poem = db.query(Poem).filter(Poem.id == poem_id).first()
@@ -120,7 +131,7 @@ def poemDelete(poem_id):
     return flask.redirect("/poems")
 
 
-@app.route("/poem/update/<poem_id>", methods=["GET", "POST"])
+@poem_actions.route("/poem/update/<poem_id>", methods=["GET", "POST"])
 @login_required
 def poemUpdate(poem_id):
     form = UpdatePoemForm()
@@ -140,14 +151,17 @@ def poemUpdate(poem_id):
 # POEM ACTIONS
 
 
-# AUTHOR ACTIONS     
-@app.route("/authors")
+# AUTHOR ACTIONS
+author_actions = flask.Blueprint("auhtoractions", __name__, template_folder='/templates')
+
+
+@author_actions.route("/authors")
 def authors():
     users = db.query(User).order_by(User.login).all()
     return flask.render_template("authors.html", users=users)
 
 
-@app.route("/authors/<author_id>")
+@author_actions.route("/authors/<author_id>")
 def author(author_id):
     author = db.get(User, author_id)
     if author:
@@ -155,10 +169,10 @@ def author(author_id):
         return flask.render_template("author.html", author=author, poems=poems)
 
 # TODO реализовать страницу изменения аккаунта
-@app.route("/authors/update/<author_id>")
+@author_actions.route("/authors/update/<author_id>")
 @login_required
 def authorUpdate(author_id):
-    pass
+    return "СТОП! Пустая страница", 404
 # AUTHOR ACTONS
 
 
@@ -279,19 +293,29 @@ def deleteAuthor():
 
 
 # SYSTEM
-@app.route("/success")
+system = flask.Blueprint("systempages", __name__, template_folder='/templates')
+@system.route("/success")
 def success():
     return flask.render_template("success.html")
 
 
-@app.route("/error/<err>")
+@system.route("/error/<err>")
 def error(err):
     return flask.render_template("error.html", err_code=err)
+
+
+@system.route("/rules")
+def rules():
+    return flask.render_template("rules.html")
 # SYSTEM
 
 def main():
     app.register_blueprint(api)
-    app.run(port=5000)
+    app.register_blueprint(system)
+    app.register_blueprint(userlogin)
+    app.register_blueprint(poem_actions)
+    app.register_blueprint(author_actions)
+    app.run(port=5000, debug=True)
 
 if __name__ == "__main__":
     db_session.global_init("./db/poemikadb.sqlite")
